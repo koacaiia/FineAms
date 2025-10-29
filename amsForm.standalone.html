@@ -688,8 +688,8 @@ BgAAAAAGAAYAhAEAAL4WAAAAAA==
   <td height=38 class=xl65 style='height:28.5pt'></td>
   <td class=xl71 style='border-top:none'>직<span
   style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>위</td>
-  <td colspan=7 class=xl86 style='border-right:1.0pt solid black;border-left:
-  none'>반장</td>
+  <td colspan=7 class="xl86 staff-position" style='border-right:1.0pt solid black;border-left:
+  none' data-field="position">반장</td>
   <td class=xl75>　</td>
  </tr>
  <tr height=38 style='mso-height-source:userset;height:28.5pt'>
@@ -1120,7 +1120,7 @@ ZWxzUEsFBgAAAAAGAAYAhQEAAMokAAAAAA==
 
 <script>
 // 체크박스 단일 선택 기능 (라디오 버튼처럼 동작)
-const staffList={"염선규":"부장","정재철":"차장","방석동":"차장","김도혁":"과장","주현숙":"과장","한기룡":"과장","조아름":"대리","박노진":"주임","김찬":"반장","박천행":"반장"};
+const staffList={"염선규":"부장","정재철":"차장","방석동":"차장","김도혁":"과장","주현숙":"과장","한기룡":"과장","장우원":"대리","조아름":"대리","박노진":"주임","김찬":"반장","박천행":"반장"};
 
 document.addEventListener('DOMContentLoaded', function() {
     // 체크박스 단일 선택
@@ -1175,16 +1175,26 @@ document.addEventListener('DOMContentLoaded', function() {
             this.appendChild(select);
             select.focus();
             
+            // 직위 업데이트 함수
+            const updatePosition = (selectedName) => {
+                const positionCell = document.querySelector('.staff-position[data-field="position"]');
+                if (positionCell && staffList[selectedName]) {
+                    positionCell.textContent = staffList[selectedName];
+                }
+            };
+            
             // select 변경 시
             select.addEventListener('change', function() {
                 const selectedName = this.value;
                 cell.textContent = selectedName;
+                updatePosition(selectedName);
             });
             
             // 포커스를 잃으면 텍스트로 복원
             select.addEventListener('blur', function() {
                 const selectedName = this.value;
                 cell.textContent = selectedName;
+                updatePosition(selectedName);
             });
         });
     });
