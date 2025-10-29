@@ -1123,6 +1123,51 @@ ZWxzUEsFBgAAAAAGAAYAhQEAAMokAAAAAA==
 const staffList={"염선규":"부장","정재철":"차장","방석동":"차장","김도혁":"과장","주현숙":"과장","한기룡":"과장","장우원":"대리","조아름":"대리","박노진":"주임","김찬":"반장","박천행":"반장"};
 
 document.addEventListener('DOMContentLoaded', function() {
+    // 날짜/시간 입력 생성 함수
+    function updateDateSelect(reason) {
+        const dateSelect = document.getElementById('dateSelect');
+        if (!dateSelect) return;
+        
+        // 기본 스타일 유지
+        const baseStyle = 'border:none;background:transparent;font:inherit;padding:2px;';
+        
+        switch(reason) {
+            case '연차':
+                // 날짜만 입력
+                dateSelect.innerHTML = '<input type="date" style="' + baseStyle + '" value="2025-10-24">';
+                break;
+                
+            case '반차':
+            case '조퇴':
+            case '외출':
+                // 날짜 + 시작시간 + 종료시간
+                dateSelect.innerHTML = 
+                    '<input type="date" style="' + baseStyle + '" value="2025-10-24"> ' +
+                    '<input type="time" style="' + baseStyle + '" value="09:00"> ~ ' +
+                    '<input type="time" style="' + baseStyle + '" value="18:00">';
+                break;
+                
+            case '휴가':
+                // 시작일 ~ 종료일
+                dateSelect.innerHTML = 
+                    '<input type="date" style="' + baseStyle + '" value="2025-10-24"> ~ ' +
+                    '<input type="date" style="' + baseStyle + '" value="2025-10-25">';
+                break;
+                
+            case '교육':
+                // 시작일 + 시작시간 ~ 종료일 + 종료시간
+                dateSelect.innerHTML = 
+                    '<input type="date" style="' + baseStyle + '" value="2025-10-24"> ' +
+                    '<input type="time" style="' + baseStyle + '" value="09:00"> ~ ' +
+                    '<input type="date" style="' + baseStyle + '" value="2025-10-24"> ' +
+                    '<input type="time" style="' + baseStyle + '" value="18:00">';
+                break;
+                
+            default:
+                dateSelect.textContent = '2025.10.24';
+        }
+    }
+    
     // 체크박스 단일 선택
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     
@@ -1149,10 +1194,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     reasonDisplays.forEach(display => {
                         display.textContent = reason;
                     });
+                    
+                    // 날짜/시간 선택 요소 업데이트
+                    updateDateSelect(reason);
                 }
             }
         });
     });
+    
+    // 페이지 로드 시 초기 설정 (연차가 기본 체크)
+    updateDateSelect('연차');
 
     // 편집 가능한 직원 이름 셀
     const editableCells = document.querySelectorAll('.editable-staff');
