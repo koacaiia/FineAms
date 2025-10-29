@@ -1123,12 +1123,26 @@ ZWxzUEsFBgAAAAAGAAYAhQEAAMokAAAAAA==
 const staffList={"염선규":"부장","정재철":"차장","방석동":"차장","김도혁":"과장","주현숙":"과장","한기룡":"과장","장우원":"대리","조아름":"대리","박노진":"주임","김찬":"반장","박천행":"반장"};
 
 document.addEventListener('DOMContentLoaded', function() {
+    let currentReason = '연차'; // 현재 선택된 사유 저장
+    
     // 날짜/시간 입력을 텍스트로 변환하는 함수
     function convertInputsToText() {
         const dateSelect = document.getElementById('dateSelect');
         if (!dateSelect) return;
         
         const inputs = dateSelect.querySelectorAll('input');
+        
+        // 모든 입력이 값을 가지고 있는지 확인
+        let allFilled = true;
+        inputs.forEach(input => {
+            if (!input.value) {
+                allFilled = false;
+            }
+        });
+        
+        // 모든 입력이 채워지지 않으면 변환하지 않음
+        if (!allFilled) return;
+        
         let textContent = '';
         
         inputs.forEach((input, index) => {
@@ -1152,12 +1166,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         dateSelect.textContent = textContent.trim();
+        dateSelect.style.cursor = 'pointer';
+        
+        // 클릭 시 다시 입력 요소로 변환
+        dateSelect.onclick = function() {
+            updateDateSelect(currentReason);
+        };
     }
     
     // 날짜/시간 입력 생성 함수
     function updateDateSelect(reason) {
         const dateSelect = document.getElementById('dateSelect');
         if (!dateSelect) return;
+        
+        // 클릭 이벤트 제거
+        dateSelect.onclick = null;
+        dateSelect.style.cursor = 'default';
         
         // 기본 스타일 유지
         const baseStyle = 'border:none;background:transparent;font:inherit;padding:2px;';
@@ -1198,12 +1222,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 dateSelect.textContent = '2025.10.24';
         }
         
-        // 생성된 입력 요소에 change 이벤트 추가
+        // 생성된 입력 요소에 이벤트 추가
         const inputs = dateSelect.querySelectorAll('input');
+        
+        // 날짜 입력에는 change 이벤트만 (선택 후에도 시간 입력 유지)
+        // 시간 입력에는 blur 이벤트 추가 (모든 입력 완료 후 변환)
         inputs.forEach(input => {
-            input.addEventListener('change', convertInputsToText);
-            input.addEventListener('blur', convertInputsToText);
+            if (input.type === 'time') {
+                input.addEventListener('blur', function() {
+                    // 약간의 지연을 두어 다른 input으로 포커스가 이동하는지 확인
+                    setTimeout(convertInputsToText, 100);
+                });
+            }
         });
+        
+        // 마지막 입력 요소에 추가 이벤트
+        if (inputs.length > 0) {
+            const lastInput = inputs[inputs.length - 1];
+            lastInput.addEventListener('change', function() {
+                setTimeout(convertInputsToText, 100);
+            });
+        }
     }
     
     // 체크박스 단일 선택
@@ -1221,6 +1260,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 선택된 체크박스의 사유를 모든 관련 필드에 업데이트
                 const reason = this.getAttribute('data-reason');
                 if (reason) {
+                    currentReason = reason; // 현재 사유 저장
+                    
                     // ID로 지정된 사유 필드 업데이트
                     const reasonCell = document.getElementById('reasonSelect');
                     if (reasonCell) {
