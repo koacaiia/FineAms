@@ -628,7 +628,7 @@ BgAAAAAGAAYAhAEAAL4WAAAAAA==
  <tr height=21 style='height:15.6pt'>
   <td height=21 class=xl65 style='height:15.6pt'></td>
   <td class=xl65></td>
-  <td class=xl73 colspan=2 style='mso-ignore:colspan'><input type="checkbox" checked disabled> 연<span
+  <td class=xl73 colspan=2 style='mso-ignore:colspan'><input type="checkbox" checked> 연<span
   style='mso-spacerun:yes'>&nbsp; </span>차</td>
   <td class=xl73 colspan=2 style='mso-ignore:colspan'><input type="checkbox"> 반<span
   style='mso-spacerun:yes'>&nbsp; </span>차</td>
@@ -680,8 +680,8 @@ BgAAAAAGAAYAhAEAAL4WAAAAAA==
   none'>창고사업부</td>
   <td colspan=2 class=xl90 style='border-right:.5pt solid black;border-left:
   none'>성<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>명</td>
-  <td colspan=3 class=xl82 style='border-right:1.0pt solid black;border-left:
-  none'>김찬</td>
+  <td colspan=3 class="xl82 editable-staff" style='border-right:1.0pt solid black;border-left:
+  none' data-field="name">김찬</td>
   <td class=xl75>　</td>
  </tr>
  <tr height=38 style='mso-height-source:userset;height:28.5pt'>
@@ -799,7 +799,7 @@ BgAAAAAGAAYAhAEAAL4WAAAAAA==
   <td class=xl65></td>
   <td colspan=2 class=xl81>신<span style='mso-spacerun:yes'>&nbsp; </span>청<span
   style='mso-spacerun:yes'>&nbsp; </span>인</td>
-  <td colspan=2 class=xl79>김찬</td>
+  <td colspan=2 class="xl79 editable-staff" data-field="applicant">김찬</td>
   <td class=xl65>인</td>
   <td class=xl74>　</td>
  </tr>
@@ -1120,19 +1120,72 @@ ZWxzUEsFBgAAAAAGAAYAhQEAAMokAAAAAA==
 
 <script>
 // 체크박스 단일 선택 기능 (라디오 버튼처럼 동작)
+const staffList={"염선규":"부장","정재철":"차장","방석동":"차장","김도혁":"과장","주현숙":"과장","한기룡":"과장","조아름":"대리","박노진":"주임","김찬":"반장","박천행":"반장"};
+
 document.addEventListener('DOMContentLoaded', function() {
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]:not([disabled])');
+    // 체크박스 단일 선택
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     
     checkboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             if (this.checked) {
-                // 현재 체크박스가 체크되면 다른 모든 체크박스 해제
                 checkboxes.forEach(otherCheckbox => {
                     if (otherCheckbox !== this) {
                         otherCheckbox.checked = false;
                     }
                 });
             }
+        });
+    });
+
+    // 편집 가능한 직원 이름 셀
+    const editableCells = document.querySelectorAll('.editable-staff');
+    
+    editableCells.forEach(cell => {
+        cell.style.cursor = 'pointer';
+        
+        cell.addEventListener('click', function() {
+            // 이미 select가 있으면 무시
+            if (this.querySelector('select')) return;
+            
+            const currentValue = this.textContent.trim();
+            const cellClasses = this.className;
+            const cellStyle = this.getAttribute('style');
+            
+            // select 요소 생성
+            const select = document.createElement('select');
+            select.style.width = '100%';
+            select.style.border = 'none';
+            select.style.background = 'transparent';
+            select.style.font = 'inherit';
+            
+            // 옵션 추가
+            Object.keys(staffList).forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                if (name === currentValue) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+            
+            // 셀 내용을 select로 교체
+            this.textContent = '';
+            this.appendChild(select);
+            select.focus();
+            
+            // select 변경 시
+            select.addEventListener('change', function() {
+                const selectedName = this.value;
+                cell.textContent = selectedName;
+            });
+            
+            // 포커스를 잃으면 텍스트로 복원
+            select.addEventListener('blur', function() {
+                const selectedName = this.value;
+                cell.textContent = selectedName;
+            });
         });
     });
 });
