@@ -42,23 +42,26 @@ rt
 -->
 </style>
 <![if !supportTabStrip]><script language="JavaScript">
-<!--
 function fnUpdateTabs()
  {
-  if (parent.window.g_iIEVer>=4) {
-   if (parent.document.readyState=="complete"
-    && parent.frames['frTabs'].document.readyState=="complete")
-   parent.fnSetActiveSheet(0);
-  else
-   window.setTimeout("fnUpdateTabs();",150);
- }
+  try {
+   if (parent.window.g_iIEVer>=4) {
+    if (parent.document.readyState=="complete"
+     && parent.frames['frTabs'].document.readyState=="complete")
+     parent.fnSetActiveSheet(0);
+    else
+     window.setTimeout("fnUpdateTabs();",150);
+   }
+  } catch(e) {
+   // Cross-origin frame access blocked - ignore
+   console.log("Frame access blocked:", e.message);
+  }
 }
 
 if (window.name!="frSheet")
  window.location.replace("../amsForm.htm");
 else
  fnUpdateTabs();
-//-->
 </script>
 <![endif]>
 </head>
