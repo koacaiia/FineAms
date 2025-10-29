@@ -1118,6 +1118,26 @@ ZWxzUEsFBgAAAAAGAAYAhQEAAMokAAAAAA==
  <![endif]>
 </table>
 
+<script>
+// 체크박스 단일 선택 기능 (라디오 버튼처럼 동작)
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]:not([disabled])');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                // 현재 체크박스가 체크되면 다른 모든 체크박스 해제
+                checkboxes.forEach(otherCheckbox => {
+                    if (otherCheckbox !== this) {
+                        otherCheckbox.checked = false;
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
+
 </body>
 
 </html>
