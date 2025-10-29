@@ -20,11 +20,23 @@ modifiedSheet = modifiedSheet.replace(
     `<style>\n${stylesheet}\n</style>`
 );
 
-// 2. 이미지 src를 base64로 교체
-modifiedSheet = modifiedSheet.replace(/src="image001\.png"/g, `src="data:image/png;base64,${image001}"`);
-modifiedSheet = modifiedSheet.replace(/src="image003\.png"/g, `src="data:image/png;base64,${image003}"`);
-modifiedSheet = modifiedSheet.replace(/src="image005\.png"/g, `src="data:image/png;base64,${image005}"`);
-modifiedSheet = modifiedSheet.replace(/src="image006\.png"/g, `src="data:image/png;base64,${image006}"`);
+// 2. 이미지 src를 base64로 교체 (img 태그와 VML v:imagedata 모두)
+modifiedSheet = modifiedSheet.replace(/src="?image001\.png"?/g, `src="data:image/png;base64,${image001}"`);
+modifiedSheet = modifiedSheet.replace(/src="?image003\.png"?/g, `src="data:image/png;base64,${image003}"`);
+modifiedSheet = modifiedSheet.replace(/src="?image005\.png"?/g, `src="data:image/png;base64,${image005}"`);
+modifiedSheet = modifiedSheet.replace(/src="?image006\.png"?/g, `src="data:image/png;base64,${image006}"`);
+
+// VML v:imagedata의 src 속성도 교체
+modifiedSheet = modifiedSheet.replace(/src="image001\.png"/gi, `src="data:image/png;base64,${image001}"`);
+modifiedSheet = modifiedSheet.replace(/src="image003\.png"/gi, `src="data:image/png;base64,${image003}"`);
+modifiedSheet = modifiedSheet.replace(/src="image005\.png"/gi, `src="data:image/png;base64,${image005}"`);
+modifiedSheet = modifiedSheet.replace(/src="image006\.png"/gi, `src="data:image/png;base64,${image006}"`);
+
+// 따옴표 없는 형태도 교체 (속성값에 따옴표가 없는 경우)
+modifiedSheet = modifiedSheet.replace(/src=image001\.png/gi, `src="data:image/png;base64,${image001}"`);
+modifiedSheet = modifiedSheet.replace(/src=image003\.png/gi, `src="data:image/png;base64,${image003}"`);
+modifiedSheet = modifiedSheet.replace(/src=image005\.png/gi, `src="data:image/png;base64,${image005}"`);
+modifiedSheet = modifiedSheet.replace(/src=image006\.png/gi, `src="data:image/png;base64,${image006}"`);
 
 // 3. 불필요한 링크 제거
 modifiedSheet = modifiedSheet.replace(/<link id=Main-File rel=Main-File href="\.\.\/amsForm\.htm">/, '');
