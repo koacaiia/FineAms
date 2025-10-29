@@ -1123,6 +1123,37 @@ ZWxzUEsFBgAAAAAGAAYAhQEAAMokAAAAAA==
 const staffList={"염선규":"부장","정재철":"차장","방석동":"차장","김도혁":"과장","주현숙":"과장","한기룡":"과장","장우원":"대리","조아름":"대리","박노진":"주임","김찬":"반장","박천행":"반장"};
 
 document.addEventListener('DOMContentLoaded', function() {
+    // 날짜/시간 입력을 텍스트로 변환하는 함수
+    function convertInputsToText() {
+        const dateSelect = document.getElementById('dateSelect');
+        if (!dateSelect) return;
+        
+        const inputs = dateSelect.querySelectorAll('input');
+        let textContent = '';
+        
+        inputs.forEach((input, index) => {
+            if (input.type === 'date') {
+                // 날짜 형식 변환: 2025-10-24 -> 2025.10.24
+                textContent += input.value.replace(/-/g, '.');
+            } else if (input.type === 'time') {
+                textContent += input.value;
+            }
+            
+            // 다음 요소가 있으면 공백 추가
+            if (index < inputs.length - 1) {
+                // 다음 텍스트 노드 확인 (~ 같은 구분자)
+                const nextSibling = input.nextSibling;
+                if (nextSibling && nextSibling.nodeType === 3) { // Text node
+                    textContent += nextSibling.textContent.trim() + ' ';
+                } else {
+                    textContent += ' ';
+                }
+            }
+        });
+        
+        dateSelect.textContent = textContent.trim();
+    }
+    
     // 날짜/시간 입력 생성 함수
     function updateDateSelect(reason) {
         const dateSelect = document.getElementById('dateSelect');
@@ -1166,6 +1197,13 @@ document.addEventListener('DOMContentLoaded', function() {
             default:
                 dateSelect.textContent = '2025.10.24';
         }
+        
+        // 생성된 입력 요소에 change 이벤트 추가
+        const inputs = dateSelect.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('change', convertInputsToText);
+            input.addEventListener('blur', convertInputsToText);
+        });
     }
     
     // 체크박스 단일 선택
