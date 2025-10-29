@@ -393,6 +393,7 @@ input[type="checkbox"]:disabled {
 	text-overflow: ellipsis;
 	padding: 2px 4px;
 	box-sizing: border-box;
+	cursor: pointer;
 }
 
 #dateSelect input {
@@ -401,6 +402,97 @@ input[type="checkbox"]:disabled {
 	font: inherit;
 	padding: 2px;
 	box-sizing: border-box;
+}
+
+/* Modal styles */
+.modal-overlay {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 9999;
+	justify-content: center;
+	align-items: center;
+}
+
+.modal-overlay.active {
+	display: flex;
+}
+
+.modal-content {
+	background: white;
+	padding: 20px;
+	border-radius: 8px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	min-width: 300px;
+	max-width: 500px;
+}
+
+.modal-header {
+	font-size: 16px;
+	font-weight: bold;
+	margin-bottom: 15px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #ddd;
+}
+
+.modal-body {
+	margin-bottom: 20px;
+}
+
+.modal-input-group {
+	margin-bottom: 12px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.modal-input-group label {
+	min-width: 60px;
+	font-size: 12px;
+}
+
+.modal-input-group input {
+	flex: 1;
+	padding: 6px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 12px;
+}
+
+.modal-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.modal-btn {
+	padding: 8px 16px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 12px;
+}
+
+.modal-btn-confirm {
+	background-color: #4CAF50;
+	color: white;
+}
+
+.modal-btn-confirm:hover {
+	background-color: #45a049;
+}
+
+.modal-btn-cancel {
+	background-color: #f44336;
+	color: white;
+}
+
+.modal-btn-cancel:hover {
+	background-color: #da190b;
 }
 
 </style>
@@ -1139,157 +1231,163 @@ ZWxzUEsFBgAAAAAGAAYAhQEAAMokAAAAAA==
 // 체크박스 단일 선택 기능 (라디오 버튼처럼 동작)
 const staffList={"염선규":"부장","정재철":"차장","방석동":"차장","김도혁":"과장","주현숙":"과장","한기룡":"과장","장우원":"대리","조아름":"대리","박노진":"주임","김찬":"반장","박천행":"반장"};
 
-document.addEventListener('DOMContentLoaded', function() {
-    let currentReason = '연차'; // 현재 선택된 사유 저장
+let currentReason = '연차'; // 현재 선택된 사유 저장
+
+// 모달 열기
+function openDateTimeModal() {
+    const modal = document.getElementById('dateTimeModal');
+    const modalInputs = document.getElementById('modalInputs');
+    const dateSelect = document.getElementById('dateSelect');
     
-    // 날짜/시간 입력을 텍스트로 변환하는 함수
-    function convertInputsToText() {
-        const dateSelect = document.getElementById('dateSelect');
-        if (!dateSelect) return;
-        
-        const inputs = dateSelect.querySelectorAll('input');
-        
-        // 모든 입력이 값을 가지고 있는지 확인
-        let allFilled = true;
-        inputs.forEach(input => {
-            if (!input.value) {
-                allFilled = false;
-            }
-        });
-        
-        // 모든 입력이 채워지지 않으면 변환하지 않음
-        if (!allFilled) return;
-        
-        let textContent = '';
-        
-        inputs.forEach((input, index) => {
-            if (input.type === 'date') {
-                // 날짜 형식 변환: 2025-10-24 -> 2025.10.24
-                textContent += input.value.replace(/-/g, '.');
-            } else if (input.type === 'time') {
-                textContent += input.value;
-            }
+    // 현재 값 파싱
+    let currentValues = {};
+    const currentText = dateSelect.textContent.trim();
+    
+    // 모달 입력 필드 생성
+    modalInputs.innerHTML = '';
+    
+    switch(currentReason) {
+        case '연차':
+            modalInputs.innerHTML = `
+                <div class="modal-input-group">
+                    <label>날짜:</label>
+                    <input type="date" id="modal-date1" value="2025-10-24">
+                </div>
+            `;
+            break;
             
-            // 다음 요소가 있으면 공백 추가
-            if (index < inputs.length - 1) {
-                // 다음 텍스트 노드 확인 (~ 같은 구분자)
-                const nextSibling = input.nextSibling;
-                if (nextSibling && nextSibling.nodeType === 3) { // Text node
-                    textContent += nextSibling.textContent.trim() + ' ';
-                } else {
-                    textContent += ' ';
-                }
+        case '반차':
+        case '조퇴':
+        case '외출':
+            modalInputs.innerHTML = `
+                <div class="modal-input-group">
+                    <label>날짜:</label>
+                    <input type="date" id="modal-date1" value="2025-10-24">
+                </div>
+                <div class="modal-input-group">
+                    <label>시작시간:</label>
+                    <input type="time" id="modal-time1" value="09:00">
+                </div>
+                <div class="modal-input-group">
+                    <label>종료시간:</label>
+                    <input type="time" id="modal-time2" value="18:00">
+                </div>
+            `;
+            break;
+            
+        case '휴가':
+            modalInputs.innerHTML = `
+                <div class="modal-input-group">
+                    <label>시작일:</label>
+                    <input type="date" id="modal-date1" value="2025-10-24">
+                </div>
+                <div class="modal-input-group">
+                    <label>종료일:</label>
+                    <input type="date" id="modal-date2" value="2025-10-25">
+                </div>
+            `;
+            break;
+            
+        case '교육':
+            modalInputs.innerHTML = `
+                <div class="modal-input-group">
+                    <label>시작일:</label>
+                    <input type="date" id="modal-date1" value="2025-10-24">
+                </div>
+                <div class="modal-input-group">
+                    <label>시작시간:</label>
+                    <input type="time" id="modal-time1" value="09:00">
+                </div>
+                <div class="modal-input-group">
+                    <label>종료일:</label>
+                    <input type="date" id="modal-date2" value="2025-10-24">
+                </div>
+                <div class="modal-input-group">
+                    <label>종료시간:</label>
+                    <input type="time" id="modal-time2" value="18:00">
+                </div>
+            `;
+            break;
+    }
+    
+    modal.classList.add('active');
+}
+
+// 모달 닫기
+function closeDateTimeModal() {
+    const modal = document.getElementById('dateTimeModal');
+    modal.classList.remove('active');
+}
+
+// 모달 확인
+function confirmDateTimeModal() {
+    const dateSelect = document.getElementById('dateSelect');
+    let textContent = '';
+    
+    const date1 = document.getElementById('modal-date1');
+    const date2 = document.getElementById('modal-date2');
+    const time1 = document.getElementById('modal-time1');
+    const time2 = document.getElementById('modal-time2');
+    
+    switch(currentReason) {
+        case '연차':
+            if (date1 && date1.value) {
+                textContent = date1.value.replace(/-/g, '.');
             }
-        });
-        
-        dateSelect.textContent = textContent.trim();
-        dateSelect.style.cursor = 'pointer';
-        
-        // 글꼴 크기 자동 조정
+            break;
+            
+        case '반차':
+        case '조퇴':
+        case '외출':
+            if (date1 && time1 && time2) {
+                textContent = date1.value.replace(/-/g, '.') + ' ' + time1.value + ' ~ ' + time2.value;
+            }
+            break;
+            
+        case '휴가':
+            if (date1 && date2) {
+                textContent = date1.value.replace(/-/g, '.') + ' ~ ' + date2.value.replace(/-/g, '.');
+            }
+            break;
+            
+        case '교육':
+            if (date1 && time1 && date2 && time2) {
+                textContent = date1.value.replace(/-/g, '.') + ' ' + time1.value + ' ~ ' + date2.value.replace(/-/g, '.') + ' ' + time2.value;
+            }
+            break;
+    }
+    
+    if (textContent) {
+        dateSelect.textContent = textContent;
         adjustFontSize();
-        
-        // 클릭 시 다시 입력 요소로 변환
-        dateSelect.onclick = function() {
-            updateDateSelect(currentReason);
-        };
     }
     
-    // 글꼴 크기 자동 조정 함수
-    function adjustFontSize() {
-        const dateSelect = document.getElementById('dateSelect');
-        if (!dateSelect || dateSelect.querySelector('input')) return;
-        
-        const maxWidth = dateSelect.offsetWidth - 10; // 여백 고려
-        let fontSize = 11; // 기본 글꼴 크기
+    closeDateTimeModal();
+}
+
+// 글꼴 크기 자동 조정 함수
+function adjustFontSize() {
+    const dateSelect = document.getElementById('dateSelect');
+    if (!dateSelect) return;
+    
+    const maxWidth = dateSelect.offsetWidth - 10;
+    let fontSize = 11;
+    dateSelect.style.fontSize = fontSize + 'pt';
+    
+    while (dateSelect.scrollWidth > maxWidth && fontSize > 6) {
+        fontSize -= 0.5;
         dateSelect.style.fontSize = fontSize + 'pt';
-        
-        // 텍스트가 넘치면 글꼴 크기 줄이기
-        while (dateSelect.scrollWidth > maxWidth && fontSize > 6) {
-            fontSize -= 0.5;
-            dateSelect.style.fontSize = fontSize + 'pt';
-        }
     }
-    
-    // 날짜/시간 입력 생성 함수
-    function updateDateSelect(reason) {
-        const dateSelect = document.getElementById('dateSelect');
-        if (!dateSelect) return;
-        
-        // 클릭 이벤트 제거
-        dateSelect.onclick = null;
-        dateSelect.style.cursor = 'default';
-        
-        // 기본 스타일 유지
-        const baseStyle = 'border:none;background:transparent;font:inherit;padding:2px;';
-        
-        switch(reason) {
-            case '연차':
-                // 날짜만 입력
-                dateSelect.innerHTML = '<input type="date" style="' + baseStyle + '" value="2025-10-24">';
-                break;
-                
-            case '반차':
-            case '조퇴':
-            case '외출':
-                // 날짜 + 시작시간 + 종료시간
-                dateSelect.innerHTML = 
-                    '<input type="date" style="' + baseStyle + '" value="2025-10-24"> ' +
-                    '<input type="time" style="' + baseStyle + '" value="09:00"> ~ ' +
-                    '<input type="time" style="' + baseStyle + '" value="18:00">';
-                break;
-                
-            case '휴가':
-                // 시작일 ~ 종료일
-                dateSelect.innerHTML = 
-                    '<input type="date" style="' + baseStyle + '" value="2025-10-24"> ~ ' +
-                    '<input type="date" style="' + baseStyle + '" value="2025-10-25">';
-                break;
-                
-            case '교육':
-                // 시작일 + 시작시간 ~ 종료일 + 종료시간
-                dateSelect.innerHTML = 
-                    '<input type="date" style="' + baseStyle + '" value="2025-10-24"> ' +
-                    '<input type="time" style="' + baseStyle + '" value="09:00"> ~ ' +
-                    '<input type="date" style="' + baseStyle + '" value="2025-10-24"> ' +
-                    '<input type="time" style="' + baseStyle + '" value="18:00">';
-                break;
-                
-            default:
-                dateSelect.textContent = '2025.10.24';
-        }
-        
-        // 생성된 입력 요소에 이벤트 추가
-        const inputs = dateSelect.querySelectorAll('input');
-        
-        // 모든 입력 완료 확인 함수
-        const checkAllInputs = function() {
-            setTimeout(function() {
-                const allInputs = dateSelect.querySelectorAll('input');
-                let allFilled = true;
-                
-                allInputs.forEach(inp => {
-                    if (!inp.value) {
-                        allFilled = false;
-                    }
-                });
-                
-                // 모든 입력이 완료되었을 때만 변환
-                if (allFilled) {
-                    convertInputsToText();
-                }
-            }, 150);
-        };
-        
-        // 모든 input에 change 이벤트 추가
-        inputs.forEach(input => {
-            input.addEventListener('change', checkAllInputs);
-        });
-        
-        // 마지막 input에만 blur 이벤트 추가 (다른 곳 클릭 시)
-        if (inputs.length > 0) {
-            const lastInput = inputs[inputs.length - 1];
-            lastInput.addEventListener('blur', checkAllInputs);
-        }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // #dateSelect 클릭 시 모달 열기
+    const dateSelect = document.getElementById('dateSelect');
+    if (dateSelect) {
+        dateSelect.addEventListener('click', openDateTimeModal);
+        // 초기값 설정
+        dateSelect.textContent = '2025.10.24';
+        adjustFontSize();
     }
     
     // 체크박스 단일 선택
@@ -1320,16 +1418,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     reasonDisplays.forEach(display => {
                         display.textContent = reason;
                     });
-                    
-                    // 날짜/시간 선택 요소 업데이트
-                    updateDateSelect(reason);
                 }
             }
         });
     });
-    
-    // 페이지 로드 시 초기 설정 (연차가 기본 체크)
-    updateDateSelect('연차');
 
     // 편집 가능한 직원 이름 셀
     const editableCells = document.querySelectorAll('.editable-staff');
@@ -1342,8 +1434,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (this.querySelector('select')) return;
             
             const currentValue = this.textContent.trim();
-            const cellClasses = this.className;
-            const cellStyle = this.getAttribute('style');
             
             // select 요소 생성
             const select = document.createElement('select');
@@ -1393,6 +1483,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<!-- Date/Time Modal -->
+<div id="dateTimeModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">날짜/시간 선택</div>
+        <div class="modal-body" id="modalInputs">
+            <!-- 동적으로 생성됨 -->
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn modal-btn-cancel" onclick="closeDateTimeModal()">취소</button>
+            <button class="modal-btn modal-btn-confirm" onclick="confirmDateTimeModal()">확인</button>
+        </div>
+    </div>
+</div>
 
 </body>
 
