@@ -1261,23 +1261,34 @@ document.addEventListener('DOMContentLoaded', function() {
         // 생성된 입력 요소에 이벤트 추가
         const inputs = dateSelect.querySelectorAll('input');
         
-        // 날짜 입력에는 change 이벤트만 (선택 후에도 시간 입력 유지)
-        // 시간 입력에는 blur 이벤트 추가 (모든 입력 완료 후 변환)
-        inputs.forEach(input => {
-            if (input.type === 'time') {
-                input.addEventListener('blur', function() {
-                    // 약간의 지연을 두어 다른 input으로 포커스가 이동하는지 확인
-                    setTimeout(convertInputsToText, 100);
+        // 모든 입력 완료 확인 함수
+        const checkAllInputs = function() {
+            setTimeout(function() {
+                const allInputs = dateSelect.querySelectorAll('input');
+                let allFilled = true;
+                
+                allInputs.forEach(inp => {
+                    if (!inp.value) {
+                        allFilled = false;
+                    }
                 });
-            }
+                
+                // 모든 입력이 완료되었을 때만 변환
+                if (allFilled) {
+                    convertInputsToText();
+                }
+            }, 150);
+        };
+        
+        // 모든 input에 change 이벤트 추가
+        inputs.forEach(input => {
+            input.addEventListener('change', checkAllInputs);
         });
         
-        // 마지막 입력 요소에 추가 이벤트
+        // 마지막 input에만 blur 이벤트 추가 (다른 곳 클릭 시)
         if (inputs.length > 0) {
             const lastInput = inputs[inputs.length - 1];
-            lastInput.addEventListener('change', function() {
-                setTimeout(convertInputsToText, 100);
-            });
+            lastInput.addEventListener('blur', checkAllInputs);
         }
     }
     
