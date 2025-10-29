@@ -628,11 +628,11 @@ BgAAAAAGAAYAhAEAAL4WAAAAAA==
  <tr height=21 style='height:15.6pt'>
   <td height=21 class=xl65 style='height:15.6pt'></td>
   <td class=xl65></td>
-  <td class=xl73 colspan=2 style='mso-ignore:colspan'><input type="checkbox" checked> 연<span
+  <td class=xl73 colspan=2 style='mso-ignore:colspan'><input type="checkbox" checked data-reason="연차"> 연<span
   style='mso-spacerun:yes'>&nbsp; </span>차</td>
-  <td class=xl73 colspan=2 style='mso-ignore:colspan'><input type="checkbox"> 반<span
+  <td class=xl73 colspan=2 style='mso-ignore:colspan'><input type="checkbox" data-reason="반차"> 반<span
   style='mso-spacerun:yes'>&nbsp; </span>차</td>
-  <td class=xl73 colspan=2 style='mso-ignore:colspan'><input type="checkbox"> 휴<span
+  <td class=xl73 colspan=2 style='mso-ignore:colspan'><input type="checkbox" data-reason="휴가"> 휴<span
   style='mso-spacerun:yes'>&nbsp; </span>가</td>
   <td class=xl65></td>
   <td class=xl74>　</td>
@@ -652,11 +652,11 @@ BgAAAAAGAAYAhAEAAL4WAAAAAA==
  <tr height=21 style='height:15.6pt'>
   <td height=21 class=xl65 style='height:15.6pt'></td>
   <td class=xl65></td>
-  <td class=xl73 colspan=2 style='mso-ignore:colspan'><input type="checkbox"> 조<span
+  <td class=xl73 colspan=2 style='mso-ignore:colspan'><input type="checkbox" data-reason="조퇴"> 조<span
   style='mso-spacerun:yes'>&nbsp; </span>퇴</td>
-  <td class=xl73 colspan=2 style='mso-ignore:colspan'><input type="checkbox"> 외<span
+  <td class=xl73 colspan=2 style='mso-ignore:colspan'><input type="checkbox" data-reason="외출"> 외<span
   style='mso-spacerun:yes'>&nbsp; </span>출</td>
-  <td class=xl73 colspan=2 style='mso-ignore:colspan'><input type="checkbox"> 교<span
+  <td class=xl73 colspan=2 style='mso-ignore:colspan'><input type="checkbox" data-reason="교육"> 교<span
   style='mso-spacerun:yes'>&nbsp; </span>육</td>
   <td class=xl65></td>
   <td class=xl74>　</td>
@@ -696,7 +696,7 @@ BgAAAAAGAAYAhAEAAL4WAAAAAA==
   <td height=38 class=xl65 style='height:28.5pt'></td>
   <td class=xl71 style='border-top:none'>기<span
   style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>간</td>
-  <td colspan=7 class=xl89 style='border-right:1.0pt solid black;border-left:
+  <td id="dateSelect" colspan=7 class=xl89 style='border-right:1.0pt solid black;border-left:
   none'>2025.10.24</td>
   <td class=xl75>　</td>
  </tr>
@@ -704,7 +704,7 @@ BgAAAAAGAAYAhAEAAL4WAAAAAA==
   <td height=38 class=xl65 style='height:28.5pt'></td>
   <td class=xl71 style='border-top:none'>사<span
   style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>유</td>
-  <td colspan=7 class=xl86 style='border-right:1.0pt solid black;border-left:
+  <td id="reasonSelect" colspan=7 class=xl86 style='border-right:1.0pt solid black;border-left:
   none'>연차</td>
   <td class=xl75>　</td>
  </tr>
@@ -731,7 +731,7 @@ BgAAAAAGAAYAhAEAAL4WAAAAAA==
  <tr height=24 style='mso-height-source:userset;height:18.0pt'>
   <td height=24 class=xl65 style='height:18.0pt'></td>
   <td class=xl77>위와같이 (</td>
-  <td colspan=3 class=xl79>연차</td>
+  <td colspan=3 class="xl79 reason-display">연차</td>
   <td class=xl65 colspan=5 style='mso-ignore:colspan;border-right:.5pt dashed black'>)계를
   제출하오니 허락하여</td>
  </tr>
@@ -1134,6 +1134,22 @@ document.addEventListener('DOMContentLoaded', function() {
                         otherCheckbox.checked = false;
                     }
                 });
+                
+                // 선택된 체크박스의 사유를 모든 관련 필드에 업데이트
+                const reason = this.getAttribute('data-reason');
+                if (reason) {
+                    // ID로 지정된 사유 필드 업데이트
+                    const reasonCell = document.getElementById('reasonSelect');
+                    if (reasonCell) {
+                        reasonCell.textContent = reason;
+                    }
+                    
+                    // 클래스로 지정된 모든 사유 표시 필드 업데이트
+                    const reasonDisplays = document.querySelectorAll('.reason-display');
+                    reasonDisplays.forEach(display => {
+                        display.textContent = reason;
+                    });
+                }
             }
         });
     });
