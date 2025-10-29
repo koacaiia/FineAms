@@ -386,6 +386,23 @@ input[type="checkbox"]:disabled {
 	opacity: 0.7;
 }
 
+/* Date select auto font sizing */
+#dateSelect {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	padding: 2px 4px;
+}
+
+#dateSelect input {
+	flex-shrink: 1;
+	min-width: 0;
+	max-width: 100%;
+}
+
 </style>
 <style>
 <!--table
@@ -1168,10 +1185,29 @@ document.addEventListener('DOMContentLoaded', function() {
         dateSelect.textContent = textContent.trim();
         dateSelect.style.cursor = 'pointer';
         
+        // 글꼴 크기 자동 조정
+        adjustFontSize();
+        
         // 클릭 시 다시 입력 요소로 변환
         dateSelect.onclick = function() {
             updateDateSelect(currentReason);
         };
+    }
+    
+    // 글꼴 크기 자동 조정 함수
+    function adjustFontSize() {
+        const dateSelect = document.getElementById('dateSelect');
+        if (!dateSelect || dateSelect.querySelector('input')) return;
+        
+        const maxWidth = dateSelect.offsetWidth - 10; // 여백 고려
+        let fontSize = 11; // 기본 글꼴 크기
+        dateSelect.style.fontSize = fontSize + 'pt';
+        
+        // 텍스트가 넘치면 글꼴 크기 줄이기
+        while (dateSelect.scrollWidth > maxWidth && fontSize > 6) {
+            fontSize -= 0.5;
+            dateSelect.style.fontSize = fontSize + 'pt';
+        }
     }
     
     // 날짜/시간 입력 생성 함수
