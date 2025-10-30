@@ -379,12 +379,8 @@ input[type="checkbox"] {
 
 /* Show a square box with a tick mark when checked (for consistent print/PDF) */
 input[type="checkbox"]:checked {
-    background-color: #fff;
+    background-color: #000;
     border: 1px solid #000;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><polyline points='3,8 6,12 13,4' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 12px 12px;
 }
 
 input[type="checkbox"]:disabled {
@@ -557,6 +553,7 @@ html, body { margin: 0; padding: 0; }
     html, body { width: 15cm !important; height: 21cm !important; overflow: hidden !important; }
     #sheet-wrapper { width: 15cm !important; height: calc(21cm - 2cm) !important; overflow: hidden !important; margin: 0 auto !important; }
     #sheet-scale { transform-origin: top left !important; }
+    #printImg { display: none !important; }
     img { visibility: visible !important; opacity: 1 !important; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
@@ -778,11 +775,11 @@ window.addEventListener('beforeprint', function(){
     if (!table || !scaler) return;
     const pxPerCm = 96 / 2.54;
     const availW = 15 * pxPerCm;
-    const availH = (21 - 2) * pxPerCm; // account for 2cm top margin
+    const availH = (21 - 2) * pxPerCm - 2; // subtract tiny epsilon to avoid overflow
     const tw = table.offsetWidth || table.getBoundingClientRect().width;
     const th = table.offsetHeight || table.getBoundingClientRect().height;
     if (!tw || !th) return;
-    const scale = Math.min(availW / tw, availH / th, 1);
+    const scale = Math.min(availW / tw, availH / th, 1) * 0.995; // slight shrink to ensure 1 page
     scaler.dataset.prevTransform = scaler.style.transform || '';
     scaler.style.transform = 'scale(' + scale + ')';
 });
@@ -821,10 +818,10 @@ window.addEventListener('afterprint', function(){
             if (!jsPDF) { if (scaler) scaler.style.transform = prevTransform; return; }
             const doc = new jsPDF({ unit: 'cm', format: [15,21], orientation: 'portrait' });
             const pageW = 15, pageH = 21, topMargin = 2;
-            const availH = pageH - topMargin;
+            const availH = pageH - topMargin - 0.1; // small padding to prevent clipping
             const imgWcm = canvas.width * 2.54 / 96; // px to cm @96dpi
             const imgHcm = canvas.height * 2.54 / 96;
-            const ratio = Math.min(pageW / imgWcm, availH / imgHcm);
+            const ratio = Math.min(pageW / imgWcm, availH / imgHcm) * 0.995;
             const w = imgWcm * ratio, h = imgHcm * ratio;
             const x = (pageW - w)/2, y = topMargin; // top margin 2cm, center horizontally
             doc.addImage(imgData, 'JPEG', x, y, w, h);
