@@ -837,19 +837,19 @@ window.addEventListener('beforeprint', function(){
     if (!table || !scaler) return;
     const pxPerCm = 96 / 2.54;
     const availW = 15 * pxPerCm;
-    const availH = 21 * pxPerCm; // Full 21cm available (no margin)
+    const availH = 20.8 * pxPerCm; // 20.8cm to leave small margin for browser chrome
     const tw = table.offsetWidth || table.getBoundingClientRect().width;
     const th = table.offsetHeight || table.getBoundingClientRect().height;
     if (!tw || !th) return;
-    // Scale to fit page exactly
-    const scale = Math.min(availW / tw, availH / th);
+    // Scale to fit page with safety margin
+    const scale = Math.min(availW / tw, availH / th) * 0.98;
     scaler.dataset.prevTransform = scaler.style.transform || '';
     scaler.style.transform = 'scale(' + scale + ')';
     scaler.style.transformOrigin = 'top left';
     // Also set wrapper max dimensions
     const wrapper = document.getElementById('sheet-wrapper');
     if (wrapper) {
-        wrapper.style.maxHeight = (availH / pxPerCm) + 'cm';
+        wrapper.style.maxHeight = '20.8cm';
         wrapper.style.overflow = 'hidden';
     }
 });
