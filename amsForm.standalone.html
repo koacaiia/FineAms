@@ -7,6 +7,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <meta http-equiv=Content-Type content="text/html; charset=utf-8">
 <meta name=ProgId content=Excel.Sheet>
 <meta name=Generator content="Microsoft Excel 15">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
 
 <!--[if !mso]>
@@ -520,6 +521,16 @@ input[type="checkbox"]:disabled {
 }
 #submitDate button { cursor: pointer; }
 
+/* Page/body sizing and responsive wrapper */
+html, body { margin: 0; padding: 0; }
+#sheet-wrapper { position: relative; width: fit-content; height: fit-content; margin: 0 auto; overflow: hidden; }
+#sheet-scale { transform-origin: top left; }
+
+@media (max-width: 768px) {
+  #sheet-wrapper { width: 100vw; overflow: auto; }
+  body { width: 100vw; height: auto; }
+}
+
 </style>
 <style>
 <!--table
@@ -675,10 +686,66 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+<script>
+// Responsive body/table sizing: fit body to table on desktop, scale to device on mobile
+(function(){
+  function setupSheetSizing(){
+    const table = document.querySelector('body > table');
+    if (!table) return;
+
+    // Wrap once
+    let wrapper = document.getElementById('sheet-wrapper');
+    let scaler = document.getElementById('sheet-scale');
+    if (!wrapper) {
+      wrapper = document.createElement('div');
+      wrapper.id = 'sheet-wrapper';
+      scaler = document.createElement('div');
+      scaler.id = 'sheet-scale';
+      const body = document.body;
+      body.insertBefore(wrapper, table);
+      wrapper.appendChild(scaler);
+      scaler.appendChild(table);
+    }
+
+    function applySize(){
+      const tableWidth = table.offsetWidth;
+      const tableHeight = table.offsetHeight;
+      if (!tableWidth || !tableHeight) return; // wait for layout
+
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const isMobile = vw <= 768;
+
+      if (isMobile) {
+        const scale = Math.min(vw / tableWidth, 1);
+        scaler.style.transform = 'scale(' + scale + ')';
+        wrapper.style.width = Math.min(tableWidth * scale, vw) + 'px';
+        wrapper.style.height = (tableHeight * scale) + 'px';
+        document.body.style.width = '100vw';
+        document.body.style.height = 'auto';
+      } else {
+        scaler.style.transform = 'scale(1)';
+        wrapper.style.width = tableWidth + 'px';
+        wrapper.style.height = tableHeight + 'px';
+        document.body.style.width = tableWidth + 'px';
+        document.body.style.height = tableHeight + 'px';
+      }
+    }
+
+    // Initial and on events
+    window.addEventListener('resize', applySize);
+    window.addEventListener('load', applySize);
+    setTimeout(applySize, 0);
+  }
+  document.addEventListener('DOMContentLoaded', setupSheetSizing);
+})();
+</script>
 </head>
 
 <body link=blue vlink=purple class=xl65>
 
+<!-- wrapper inserted dynamically by JS: #sheet-wrapper > #sheet-scale -->
 <table border=0 cellpadding=0 cellspacing=0 width=495 style='border-collapse:
  collapse;table-layout:fixed;width:374pt'>
  <col class=xl65 width=62 style='mso-width-source:userset;mso-width-alt:1996;
