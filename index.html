@@ -559,8 +559,8 @@ input[type="checkbox"]:disabled {
 #submitDate button { cursor: pointer; }
 
 /* Page/body sizing and responsive wrapper */
-html, body { margin: 0; padding: 0; }
-#sheet-wrapper { position: relative; width: fit-content; height: fit-content; margin: 0 auto; overflow: hidden; }
+html, body { margin: 0; padding: 0; height: auto; min-height: 100vh; }
+#sheet-wrapper { position: relative; width: fit-content; height: auto; margin: 0 auto; padding-bottom: 40px; }
 #sheet-scale { transform-origin: top left; }
 
 @media (max-width: 768px) {
