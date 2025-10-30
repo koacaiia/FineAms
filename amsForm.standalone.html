@@ -1534,8 +1534,7 @@ function confirmDateTimeModal() {
     
     if (textContent) {
         dateSelect.textContent = textContent;
-        // 폰트 크기를 셀에 꽉 차게 조정
-        setTimeout(adjustDateSelectFontSize, 0);
+        // 폰트 크기는 staffList select와 동일(11pt)로 고정
     }
     
     closeDateTimeModal();
@@ -1546,8 +1545,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const dateSelect = document.getElementById('dateSelect');
     if (dateSelect) {
         dateSelect.addEventListener('click', openDateTimeModal);
-        // 초기 로드 시 폰트 크기 조정
-        setTimeout(adjustDateSelectFontSize, 0);
+        // 폰트 자동 조정 비활성화: staffList select와 동일한 크기로 유지
     }
     
     // 체크박스 단일 선택
