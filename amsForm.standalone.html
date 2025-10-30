@@ -1109,7 +1109,7 @@ BgAAAAAGAAYAhAEAAL4WAAAAAA==
   <td class=xl65></td>
   <td colspan=2 class=xl81>신<span style='mso-spacerun:yes'>&nbsp; </span>청<span
   style='mso-spacerun:yes'>&nbsp; </span>인</td>
-  <td colspan=2 class="xl79 editable-staff" data-field="applicant">김찬</td>
+  <td colspan=2 id="submtStaff" class="xl79 editable-staff" data-field="applicant">신청인</td>
   <td class=xl65>인</td>
   <td class=xl74>　</td>
  </tr>
@@ -1690,12 +1690,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     positionCell.textContent = staffList[selectedName];
                 }
             };
+
+            // submitStaff 업데이트 함수
+            const updateSubmitStaff = (selectedName) => {
+                const submitStaffCell = document.getElementById('submtStaff');
+                if (submitStaffCell) {
+                    submitStaffCell.textContent = selectedName;
+                }
+            };
             
             // select 변경 시
             select.addEventListener('change', function() {
                 const selectedName = this.value;
                 cell.textContent = selectedName;
                 updatePosition(selectedName);
+                updateSubmitStaff(selectedName);
             });
             
             // 포커스를 잃으면 텍스트로 복원
@@ -1703,6 +1712,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const selectedName = this.value;
                 cell.textContent = selectedName;
                 updatePosition(selectedName);
+                updateSubmitStaff(selectedName);
             });
         });
     });
