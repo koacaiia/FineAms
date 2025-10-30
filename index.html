@@ -918,7 +918,7 @@ window.addEventListener('afterprint', function(){
             const imgHcm = canvas.height * 2.54 / 96;
             const ratio = Math.min(availW / imgWcm, availH / imgHcm) * 0.995;
             const w = imgWcm * ratio, h = imgHcm * ratio;
-            const x = (pageW - w)/2, y = topMargin;
+            const x = sideMargin, y = topMargin; // Left align with side margin
             doc.addImage(imgData, 'JPEG', x, y, w, h);
             
             if (scaler) scaler.style.transform = prevTransform;
