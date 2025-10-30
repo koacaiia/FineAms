@@ -394,6 +394,9 @@ input[type="checkbox"]:disabled {
 	padding: 2px 4px;
 	box-sizing: border-box;
 	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 #dateSelect input {
@@ -1364,6 +1367,35 @@ const staffList={"염선규":"부장","정재철":"차장","방석동":"차장",
 
 let currentReason = '연차'; // 현재 선택된 사유 저장
 
+// #dateSelect 폰트 크기 자동 조정 함수
+function adjustDateSelectFontSize() {
+    const cell = document.getElementById('dateSelect');
+    if (!cell) return;
+    
+    // 입력 모드일 때는 조정하지 않음
+    if (cell.querySelector('input')) return;
+    
+    const cellWidth = cell.offsetWidth;
+    const cellHeight = cell.offsetHeight;
+    
+    if (cellWidth === 0 || cellHeight === 0) return;
+    
+    // 초기 폰트 크기를 크게 설정
+    let fontSize = 48;
+    cell.style.fontSize = fontSize + 'px';
+    
+    // 텍스트가 셀을 넘지 않을 때까지 폰트 크기 감소
+    while ((cell.scrollWidth > cellWidth || cell.scrollHeight > cellHeight) && fontSize > 6) {
+        fontSize -= 0.5;
+        cell.style.fontSize = fontSize + 'px';
+    }
+    
+    // 최적 크기보다 약간 작게 조정하여 여백 확보
+    if (fontSize > 6) {
+        cell.style.fontSize = (fontSize - 1) + 'px';
+    }
+}
+
 // 모달 열기
 function openDateTimeModal() {
     const modal = document.getElementById('dateTimeModal');
@@ -1490,25 +1522,11 @@ function confirmDateTimeModal() {
     
     if (textContent) {
         dateSelect.textContent = textContent;
-        adjustFontSize();
+        // 폰트 크기를 셀에 꽉 차게 조정
+        setTimeout(adjustDateSelectFontSize, 0);
     }
     
     closeDateTimeModal();
-}
-
-// 글꼴 크기 자동 조정 함수
-function adjustFontSize() {
-    const dateSelect = document.getElementById('dateSelect');
-    if (!dateSelect) return;
-    
-    const maxWidth = dateSelect.offsetWidth - 10;
-    let fontSize = 11;
-    dateSelect.style.fontSize = fontSize + 'pt';
-    
-    while (dateSelect.scrollWidth > maxWidth && fontSize > 6) {
-        fontSize -= 0.5;
-        dateSelect.style.fontSize = fontSize + 'pt';
-    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1516,9 +1534,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const dateSelect = document.getElementById('dateSelect');
     if (dateSelect) {
         dateSelect.addEventListener('click', openDateTimeModal);
-        // 초기값 설정
-        dateSelect.textContent = '2025.10.24';
-        adjustFontSize();
+        // 초기 로드 시 폰트 크기 조정
+        setTimeout(adjustDateSelectFontSize, 0);
     }
     
     // 체크박스 단일 선택
