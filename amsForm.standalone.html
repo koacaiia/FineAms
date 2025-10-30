@@ -377,20 +377,10 @@ input[type="checkbox"] {
 	margin-right: 4px;
 }
 
-/* Show a square box with a tick mark when checked (for consistent print/PDF) */
+/* Show a square box filled with black when checked (for consistent print/PDF) */
 input[type="checkbox"]:checked {
-    background-color: #fff;
+    background-color: #000;
     border: 1px solid #000;
-}
-
-input[type="checkbox"]:checked::after {
-    content: '✓';
-    position: absolute;
-    top: -2px;
-    left: 1px;
-    font-size: 14px;
-    font-weight: bold;
-    color: #000;
 }
 
 input[type="checkbox"]:disabled {
