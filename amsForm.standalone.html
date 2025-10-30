@@ -1504,16 +1504,36 @@ document.addEventListener('DOMContentLoaded', function() {
             const input = document.createElement('input');
             input.type = 'text';
             input.value = (currentText === '　') ? '' : currentText;
-            input.style.width = '100%';
+            input.style.width = 'calc(100% - 58px)';
             input.style.border = 'none';
             input.style.background = 'transparent';
             input.style.font = 'inherit';
             input.style.padding = '2px 4px';
+            input.setAttribute('aria-label', '비고 입력');
+            
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = '확인';
+            btn.style.marginLeft = '6px';
+            btn.style.padding = '2px 8px';
+            btn.style.font = 'inherit';
+            btn.style.cursor = 'pointer';
+            btn.style.border = '1px solid #999';
+            btn.style.background = '#f5f5f5';
+
             // Avoid bubbling to the cell click
             input.addEventListener('click', function(ev){ ev.stopPropagation(); });
+            btn.addEventListener('click', function(ev){ ev.stopPropagation(); });
 
+            // Build editor UI
             remarkCell.textContent = '';
-            remarkCell.appendChild(input);
+            const wrapper = document.createElement('span');
+            wrapper.style.display = 'inline-flex';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.width = '100%';
+            wrapper.appendChild(input);
+            wrapper.appendChild(btn);
+            remarkCell.appendChild(wrapper);
             input.focus();
             input.select();
 
@@ -1521,15 +1541,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 const v = input.value.trim();
                 remarkCell.textContent = v || '　';
             };
+            // Enter triggers confirm button; Escape cancels
             input.addEventListener('keydown', function(ev){
                 if (ev.key === 'Enter') {
-                    commit();
+                    btn.click();
                 } else if (ev.key === 'Escape') {
                     // Revert
                     remarkCell.textContent = currentText || '　';
                 }
             });
-            input.addEventListener('blur', commit);
+            // Only confirm button applies changes
+            btn.addEventListener('click', commit);
         });
     }
 });
