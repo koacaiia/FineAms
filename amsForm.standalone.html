@@ -611,6 +611,19 @@ html, body { margin: 0; padding: 0; }
     table {
         page-break-inside: avoid !important;
         page-break-after: avoid !important;
+        font-size: 8pt !important;
+    }
+    tr {
+        height: auto !important;
+        max-height: 20px !important;
+    }
+    td {
+        font-size: 8pt !important;
+        padding: 1px !important;
+        line-height: 1.1 !important;
+    }
+    .xl70, .xl71, .xl72, .xl73, .xl79, .xl80 {
+        font-size: 8pt !important;
     }
     #printImg { display: none !important; }
     img { visibility: visible !important; opacity: 1 !important; }
@@ -841,8 +854,8 @@ window.addEventListener('beforeprint', function(){
     const tw = table.offsetWidth || table.getBoundingClientRect().width;
     const th = table.offsetHeight || table.getBoundingClientRect().height;
     if (!tw || !th) return;
-    // Very aggressive scaling to ensure single page - use smaller scale factor
-    const scale = Math.min(availW / tw, availH / th) * 0.92; // 92% to ensure single page
+    // Scale to fit page (font sizes reduced in @media print)
+    const scale = Math.min(availW / tw, availH / th);
     scaler.dataset.prevTransform = scaler.style.transform || '';
     scaler.style.transform = 'scale(' + scale + ')';
     scaler.style.transformOrigin = 'top left';
