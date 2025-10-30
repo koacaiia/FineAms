@@ -885,10 +885,14 @@ window.addEventListener('afterprint', function(){
             const w = imgWcm * ratio, h = imgHcm * ratio;
             const x = (pageW - w)/2, y = topMargin; // top margin 2cm, center horizontally
             doc.addImage(imgData, 'JPEG', x, y, w, h);
-            doc.save('fineams.pdf');
+            
             if (scaler) scaler.style.transform = prevTransform;
+            
+            // Return PDF blob for sharing
+            return doc.output('blob');
         } catch(e) {
             console.error('PDF generation failed:', e);
+            return null;
         }
     }
 
@@ -897,8 +901,40 @@ window.addEventListener('afterprint', function(){
         if (!btn) return;
         btn.addEventListener('click', async function(e){
             e.preventDefault();
-            // Always generate a one-page PDF (desktop and mobile)
-            await generatePDF();
+            
+            if (isMobile()) {
+                // Mobile: Generate PDF and share
+                const pdfBlob = await generatePDF();
+                if (pdfBlob && navigator.share) {
+                    try {
+                        const file = new File([pdfBlob], 'fineams.pdf', { type: 'application/pdf' });
+                        await navigator.share({
+                            title: '근태계',
+                            files: [file]
+                        });
+                    } catch(err) {
+                        // If sharing fails or is cancelled, download the file
+                        console.log('Share cancelled or failed:', err);
+                        const url = URL.createObjectURL(pdfBlob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'fineams.pdf';
+                        a.click();
+                        URL.revokeObjectURL(url);
+                    }
+                } else if (pdfBlob) {
+                    // Fallback: download if share API not available
+                    const url = URL.createObjectURL(pdfBlob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'fineams.pdf';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                }
+            } else {
+                // Desktop: Open print dialog
+                window.print();
+            }
         });
     });
 })();
