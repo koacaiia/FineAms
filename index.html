@@ -1844,8 +1844,24 @@ function confirmDateTimeModal() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // #dateSelect 클릭 시 모달 열기
+    // 초기 날짜 설정 (당일)
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${year}.${month}.${day}`;
+    
+    const submitDate = document.getElementById('submitDate');
     const dateSelect = document.getElementById('dateSelect');
+    
+    if (submitDate) {
+        submitDate.textContent = `  ${year}년 ${month}월 ${day}일`;
+    }
+    if (dateSelect) {
+        dateSelect.textContent = todayStr;
+    }
+    
+    // #dateSelect 클릭 시 모달 열기
     if (dateSelect) {
         dateSelect.addEventListener('click', openDateTimeModal);
         // 폰트 자동 조정 비활성화: staffList select와 동일한 크기로 유지
