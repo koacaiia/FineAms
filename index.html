@@ -585,20 +585,20 @@ html, body { margin: 0; padding: 0; height: auto; min-height: 100vh; }
 #printImg:hover { background: #e9e9e9; }
 /* Print layout adjustments */
 @page { 
-    size: A4 portrait; 
+    size: A4 landscape; 
     margin: 1cm 1cm 1cm 1cm; 
 }
 @media print {
     html, body { 
-        width: 21cm !important; 
-        height: 29.7cm !important; 
+        width: 29.7cm !important; 
+        height: 21cm !important; 
         overflow: hidden !important;
         margin: 0 !important;
         padding: 0 !important;
     }
     #sheet-wrapper { 
-        width: 19cm !important; 
-        max-height: 27.7cm !important; 
+        width: 27.7cm !important; 
+        max-height: 19cm !important; 
         overflow: hidden !important; 
         margin: 0 auto !important;
         page-break-after: avoid !important;
@@ -836,8 +836,8 @@ window.addEventListener('beforeprint', function(){
     const scaler = document.getElementById('sheet-scale');
     if (!table || !scaler) return;
     const pxPerCm = 96 / 2.54;
-    const availW = 19 * pxPerCm; // A4 width 21cm - 2cm margins
-    const availH = 27.7 * pxPerCm; // A4 height 29.7cm - 2cm margins
+    const availW = 27.7 * pxPerCm; // A4 landscape width 29.7cm - 2cm margins
+    const availH = 19 * pxPerCm; // A4 landscape height 21cm - 2cm margins
     const tw = table.offsetWidth || table.getBoundingClientRect().width;
     const th = table.offsetHeight || table.getBoundingClientRect().height;
     if (!tw || !th) return;
@@ -849,7 +849,7 @@ window.addEventListener('beforeprint', function(){
     // Also set wrapper max dimensions
     const wrapper = document.getElementById('sheet-wrapper');
     if (wrapper) {
-        wrapper.style.maxHeight = '27.7cm';
+        wrapper.style.maxHeight = '19cm';
         wrapper.style.overflow = 'hidden';
     }
 });
@@ -910,8 +910,8 @@ window.addEventListener('afterprint', function(){
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
             const { jsPDF } = window.jspdf || {};
             if (!jsPDF) { if (scaler) scaler.style.transform = prevTransform; return; }
-            const doc = new jsPDF({ unit: 'cm', format: 'a4', orientation: 'portrait' });
-            const pageW = 21, pageH = 29.7, topMargin = 1, sideMargin = 1;
+            const doc = new jsPDF({ unit: 'cm', format: 'a4', orientation: 'landscape' });
+            const pageW = 29.7, pageH = 21, topMargin = 1, sideMargin = 1;
             const availW = pageW - sideMargin * 2;
             const availH = pageH - topMargin - 1; // 1cm top + 1cm bottom margin
             const imgWcm = canvas.width * 2.54 / 96; // px to cm @96dpi
