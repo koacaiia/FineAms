@@ -875,11 +875,25 @@ window.addEventListener('afterprint', function(){
     
     function isChrome(){
         const ua = navigator.userAgent.toLowerCase();
-        return ua.includes('chrome') && !ua.includes('edg') && !ua.includes('samsungbrowser');
+        // Chrome이면서 다른 브라우저가 아닌 경우
+        const hasChrome = ua.includes('chrome');
+        const isEdge = ua.includes('edg');
+        const isSamsung = ua.includes('samsungbrowser') || ua.includes('samsung');
+        const isKakao = ua.includes('kakaotalk') || ua.includes('kakao');
+        const isNaver = ua.includes('naver');
+        const isOther = ua.includes('wv') || ua.includes('webview');
+        
+        return hasChrome && !isEdge && !isSamsung && !isKakao && !isNaver && !isOther;
     }
     
     function checkBrowser(){
-        if (isMobile() && !isChrome()) {
+        const mobile = isMobile();
+        const chrome = isChrome();
+        const ua = navigator.userAgent;
+        
+        console.log('Browser check - Mobile:', mobile, 'Chrome:', chrome, 'UA:', ua);
+        
+        if (mobile && !chrome) {
             const currentUrl = window.location.href;
             const chromeIntent = `intent://${window.location.host}${window.location.pathname}${window.location.search}#Intent;scheme=https;package=com.android.chrome;end`;
             
