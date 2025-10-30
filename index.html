@@ -586,7 +586,7 @@ html, body { margin: 0; padding: 0; }
 /* Print layout adjustments */
 @page { 
     size: 15cm 21cm; 
-    margin: 0.5cm 0 0 0; 
+    margin: 0; 
 }
 @media print {
     html, body { 
@@ -598,7 +598,7 @@ html, body { margin: 0; padding: 0; }
     }
     #sheet-wrapper { 
         width: 15cm !important; 
-        max-height: 20.5cm !important; 
+        max-height: 21cm !important; 
         overflow: hidden !important; 
         margin: 0 auto !important;
         page-break-after: avoid !important;
@@ -837,7 +837,7 @@ window.addEventListener('beforeprint', function(){
     if (!table || !scaler) return;
     const pxPerCm = 96 / 2.54;
     const availW = 15 * pxPerCm;
-    const availH = (21 - 0.5) * pxPerCm; // 21cm - 0.5cm top margin = 20.5cm available
+    const availH = 21 * pxPerCm; // Full 21cm available (no margin)
     const tw = table.offsetWidth || table.getBoundingClientRect().width;
     const th = table.offsetHeight || table.getBoundingClientRect().height;
     if (!tw || !th) return;
@@ -911,13 +911,13 @@ window.addEventListener('afterprint', function(){
             const { jsPDF } = window.jspdf || {};
             if (!jsPDF) { if (scaler) scaler.style.transform = prevTransform; return; }
             const doc = new jsPDF({ unit: 'cm', format: [15,21], orientation: 'portrait' });
-            const pageW = 15, pageH = 21, topMargin = 0.5;
+            const pageW = 15, pageH = 21, topMargin = 0;
             const availH = pageH - topMargin - 0.1; // small padding to prevent clipping
             const imgWcm = canvas.width * 2.54 / 96; // px to cm @96dpi
             const imgHcm = canvas.height * 2.54 / 96;
             const ratio = Math.min(pageW / imgWcm, availH / imgHcm) * 0.995;
             const w = imgWcm * ratio, h = imgHcm * ratio;
-            const x = (pageW - w)/2, y = topMargin; // top margin 2cm, center horizontally
+            const x = (pageW - w)/2, y = topMargin; // no top margin, center horizontally
             doc.addImage(imgData, 'JPEG', x, y, w, h);
             
             if (scaler) scaler.style.transform = prevTransform;
