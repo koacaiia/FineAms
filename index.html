@@ -586,7 +586,7 @@ html, body { margin: 0; padding: 0; height: auto; min-height: 100vh; }
 /* Print layout adjustments */
 @page { 
     size: 15cm 21cm; 
-    margin: 0; 
+    margin: 1cm 0 0 0; 
 }
 @media print {
     html, body { 
@@ -598,7 +598,7 @@ html, body { margin: 0; padding: 0; height: auto; min-height: 100vh; }
     }
     #sheet-wrapper { 
         width: 15cm !important; 
-        max-height: 20.5cm !important; 
+        max-height: 19.5cm !important; 
         overflow: hidden !important; 
         margin: 0 auto !important;
         page-break-after: avoid !important;
@@ -837,7 +837,7 @@ window.addEventListener('beforeprint', function(){
     if (!table || !scaler) return;
     const pxPerCm = 96 / 2.54;
     const availW = 15 * pxPerCm;
-    const availH = 20.5 * pxPerCm; // 20.5cm safe height
+    const availH = 19.5 * pxPerCm; // 21cm - 1cm top margin - 0.5cm safety = 19.5cm
     const tw = table.offsetWidth || table.getBoundingClientRect().width;
     const th = table.offsetHeight || table.getBoundingClientRect().height;
     if (!tw || !th) return;
@@ -849,7 +849,7 @@ window.addEventListener('beforeprint', function(){
     // Also set wrapper max dimensions
     const wrapper = document.getElementById('sheet-wrapper');
     if (wrapper) {
-        wrapper.style.maxHeight = '20.5cm';
+        wrapper.style.maxHeight = '19.5cm';
         wrapper.style.overflow = 'hidden';
     }
 });
@@ -911,8 +911,8 @@ window.addEventListener('afterprint', function(){
             const { jsPDF } = window.jspdf || {};
             if (!jsPDF) { if (scaler) scaler.style.transform = prevTransform; return; }
             const doc = new jsPDF({ unit: 'cm', format: [15,21], orientation: 'portrait' });
-            const pageW = 15, pageH = 21, topMargin = 0;
-            const availH = pageH - topMargin - 0.1; // small padding to prevent clipping
+            const pageW = 15, pageH = 21, topMargin = 1;
+            const availH = pageH - topMargin - 0.5; // 1cm top margin + 0.5cm safety
             const imgWcm = canvas.width * 2.54 / 96; // px to cm @96dpi
             const imgHcm = canvas.height * 2.54 / 96;
             const ratio = Math.min(pageW / imgWcm, availH / imgHcm) * 0.995;
