@@ -902,9 +902,11 @@ window.addEventListener('afterprint', function(){
         btn.addEventListener('click', async function(e){
             e.preventDefault();
             
+            // Generate PDF for both desktop and mobile to ensure single page
+            const pdfBlob = await generatePDF();
+            
             if (isMobile()) {
-                // Mobile: Generate PDF and share
-                const pdfBlob = await generatePDF();
+                // Mobile: Try to share, fallback to download
                 if (pdfBlob && navigator.share) {
                     try {
                         const file = new File([pdfBlob], 'fineams.pdf', { type: 'application/pdf' });
@@ -932,8 +934,15 @@ window.addEventListener('afterprint', function(){
                     URL.revokeObjectURL(url);
                 }
             } else {
-                // Desktop: Open print dialog
-                window.print();
+                // Desktop: Download PDF directly (guaranteed single page)
+                if (pdfBlob) {
+                    const url = URL.createObjectURL(pdfBlob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'fineams.pdf';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                }
             }
         });
     });
