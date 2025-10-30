@@ -404,6 +404,16 @@ input[type="checkbox"]:disabled {
 	box-sizing: border-box;
 }
 
+/* Remark editable input */
+#remark input[type="text"] {
+    border: none;
+    background: transparent;
+    font: inherit;
+    width: 100%;
+    padding: 2px 4px;
+    box-sizing: border-box;
+}
+
 /* Modal styles */
 .modal-overlay {
 	display: none;
@@ -821,7 +831,7 @@ BgAAAAAGAAYAhAEAAL4WAAAAAA==
   <td height=38 class=xl65 style='height:28.5pt'></td>
   <td class=xl72 style='border-top:none'>비<span
   style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>고</td>
-  <td colspan=7 class=xl92 style='border-right:1.0pt solid black;border-left:
+  <td colspan=7 id="remark" class=xl92 style='border-right:1.0pt solid black;border-left:
   none'>　</td>
   <td class=xl75>　</td>
  </tr>
@@ -1481,6 +1491,47 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+
+    // Remark editable behavior: click to edit, blur/Enter to commit, click again to re-edit
+    const remarkCell = document.getElementById('remark');
+    if (remarkCell) {
+        remarkCell.style.cursor = 'text';
+        remarkCell.addEventListener('click', function (e) {
+            // Prevent re-creating input if already editing
+            if (remarkCell.querySelector('input[type="text"]')) return;
+
+            const currentText = remarkCell.textContent.replace(/\s+/g, ' ').trim();
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = (currentText === '　') ? '' : currentText;
+            input.style.width = '100%';
+            input.style.border = 'none';
+            input.style.background = 'transparent';
+            input.style.font = 'inherit';
+            input.style.padding = '2px 4px';
+            // Avoid bubbling to the cell click
+            input.addEventListener('click', function(ev){ ev.stopPropagation(); });
+
+            remarkCell.textContent = '';
+            remarkCell.appendChild(input);
+            input.focus();
+            input.select();
+
+            const commit = () => {
+                const v = input.value.trim();
+                remarkCell.textContent = v || '　';
+            };
+            input.addEventListener('keydown', function(ev){
+                if (ev.key === 'Enter') {
+                    commit();
+                } else if (ev.key === 'Escape') {
+                    // Revert
+                    remarkCell.textContent = currentText || '　';
+                }
+            });
+            input.addEventListener('blur', commit);
+        });
+    }
 });
 </script>
 
