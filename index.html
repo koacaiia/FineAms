@@ -873,6 +873,22 @@ window.addEventListener('afterprint', function(){
         return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     }
     
+    function isChrome(){
+        const ua = navigator.userAgent.toLowerCase();
+        return ua.includes('chrome') && !ua.includes('edg') && !ua.includes('samsungbrowser');
+    }
+    
+    function checkBrowser(){
+        if (isMobile() && !isChrome()) {
+            const currentUrl = window.location.href;
+            const chromeIntent = `intent://${window.location.host}${window.location.pathname}${window.location.search}#Intent;scheme=https;package=com.android.chrome;end`;
+            
+            if (confirm('이 페이지는 Chrome 브라우저에서 최적화되어 있습니다.\nChrome으로 열까요?')) {
+                window.location.href = chromeIntent;
+            }
+        }
+    }
+    
     function downloadPDF(pdfBlob) {
         const url = URL.createObjectURL(pdfBlob);
         const a = document.createElement('a');
@@ -1026,6 +1042,9 @@ window.addEventListener('afterprint', function(){
             }
         });
     });
+    
+    // Check browser on load
+    window.addEventListener('load', checkBrowser);
 })();
 </script>
 </head>
