@@ -379,8 +379,18 @@ input[type="checkbox"] {
 
 /* Show a square box with a tick mark when checked (for consistent print/PDF) */
 input[type="checkbox"]:checked {
-    background-color: #000;
+    background-color: #fff;
     border: 1px solid #000;
+}
+
+input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: -2px;
+    left: 1px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #000;
 }
 
 input[type="checkbox"]:disabled {
@@ -837,12 +847,8 @@ window.addEventListener('afterprint', function(){
         if (!btn) return;
         btn.addEventListener('click', async function(e){
             e.preventDefault();
-            if (isMobile()) {
-                await generatePDF();
-            } else {
-                // Desktop: use browser print (user can select PDF printer)
-                window.print();
-            }
+            // Always generate a one-page PDF (desktop and mobile)
+            await generatePDF();
         });
     });
 })();
