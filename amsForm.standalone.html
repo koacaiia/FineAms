@@ -375,19 +375,48 @@ input[type="checkbox"] {
 	position: relative;
 	vertical-align: middle;
 	margin-right: 4px;
+	overflow: hidden;
 }
 
 /* Show a square box filled with black when checked (for consistent print/PDF) */
 input[type="checkbox"]:checked {
+    background: #000 !important;
     background-color: #000 !important;
     border: 1px solid #000 !important;
+    color: transparent !important;
 }
 
-/* Remove any default checkmark */
+/* Remove any default checkmark - all pseudo elements */
+input[type="checkbox"]::before,
+input[type="checkbox"]::after,
 input[type="checkbox"]:checked::before,
 input[type="checkbox"]:checked::after {
-    content: none !important;
+    content: '' !important;
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* Print-specific styles for checkbox */
+@media print {
+    input[type="checkbox"]:checked {
+        background: #000 !important;
+        background-color: #000 !important;
+        border: 1px solid #000 !important;
+        color: transparent !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    input[type="checkbox"]::before,
+    input[type="checkbox"]::after,
+    input[type="checkbox"]:checked::before,
+    input[type="checkbox"]:checked::after {
+        content: '' !important;
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
 }
 
 input[type="checkbox"]:disabled {
