@@ -505,6 +505,18 @@ input[type="checkbox"]:disabled {
 	background-color: #da190b;
 }
 
+/* SubmitDate inline editor */
+#submitDate { cursor: pointer; }
+#submitDate .sd-wrapper { display: inline-flex; align-items: center; gap: 6px; }
+#submitDate select, #submitDate button {
+    font: inherit;
+    padding: 2px 6px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background: #fff;
+}
+#submitDate button { cursor: pointer; }
+
 </style>
 <style>
 <!--table
@@ -550,6 +562,116 @@ function fnUpdateTabs()
 
 </script>
 <![endif]>
+<script>
+// Submit date (출근부정리인) inline yyyy년 MM월 DD일 selector with Confirm
+document.addEventListener('DOMContentLoaded', function () {
+    const cell = document.getElementById('submitDate');
+    if (!cell) return;
+
+    function pad2(n) { return String(n).padStart(2, '0'); }
+    function daysInMonth(y, m) { return new Date(y, m, 0).getDate(); }
+
+    function parseDateFromText(text) {
+        // Extract 3 numbers in order: yyyy, mm, dd
+        const m = (text || '').replace(/\s+/g, ' ').match(/(\d{4}).*?(\d{1,2}).*?(\d{1,2})/);
+        if (m) {
+            return { y: parseInt(m[1], 10), m: parseInt(m[2], 10), d: parseInt(m[3], 10) };
+        }
+        const t = new Date();
+        return { y: t.getFullYear(), m: t.getMonth() + 1, d: t.getDate() };
+    }
+
+    function buildSelect(min, max, value) {
+        const sel = document.createElement('select');
+        for (let v = min; v <= max; v++) {
+            const opt = document.createElement('option');
+            opt.value = String(v);
+            opt.textContent = String(v);
+            if (v === value) opt.selected = true;
+            sel.appendChild(opt);
+        }
+        return sel;
+    }
+
+    function renderDisplay(y, m, d) {
+        cell.dataset.editing = 'false';
+        cell.textContent = `${y}년 ${pad2(m)}월 ${pad2(d)}일`;
+        cell.title = '클릭하여 날짜를 선택하세요';
+    }
+
+    function enterEdit(prefill) {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const y0 = prefill?.y ?? currentYear;
+        const m0 = prefill?.m ?? (now.getMonth() + 1);
+        const d0 = prefill?.d ?? now.getDate();
+
+        cell.dataset.editing = 'true';
+        while (cell.firstChild) cell.removeChild(cell.firstChild);
+
+        const wrap = document.createElement('span');
+        wrap.className = 'sd-wrapper';
+
+        let yMin = currentYear - 5, yMax = currentYear + 5;
+        if (y0 < yMin) yMin = y0;
+        if (y0 > yMax) yMax = y0;
+        const ySel = buildSelect(yMin, yMax, y0);
+        const mSel = buildSelect(1, 12, m0);
+        const dSel = buildSelect(1, daysInMonth(y0, m0), Math.min(d0, daysInMonth(y0, m0)));
+
+        const yLabel = document.createElement('span'); yLabel.textContent = '년';
+        const mLabel = document.createElement('span'); mLabel.textContent = '월';
+        const dLabel = document.createElement('span'); dLabel.textContent = '일';
+
+        function syncDays() {
+            const y = parseInt(ySel.value, 10);
+            const m = parseInt(mSel.value, 10);
+            const maxD = daysInMonth(y, m);
+            const current = parseInt(dSel.value, 10);
+            // Rebuild if needed
+            if (dSel.options.length !== maxD) {
+                dSel.innerHTML = '';
+                for (let v = 1; v <= maxD; v++) {
+                    const opt = document.createElement('option');
+                    opt.value = String(v);
+                    opt.textContent = pad2(v);
+                    dSel.appendChild(opt);
+                }
+            }
+            if (current > maxD) dSel.value = String(maxD);
+        }
+
+        ySel.addEventListener('change', syncDays);
+        mSel.addEventListener('change', syncDays);
+
+        const okBtn = document.createElement('button');
+        okBtn.type = 'button';
+        okBtn.textContent = '확인';
+        okBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const y = parseInt(ySel.value, 10);
+            const m = parseInt(mSel.value, 10);
+            const d = parseInt(dSel.value, 10);
+            renderDisplay(y, m, d);
+        });
+
+        // Assemble
+        wrap.appendChild(ySel); wrap.appendChild(yLabel);
+        wrap.appendChild(mSel); wrap.appendChild(mLabel);
+        wrap.appendChild(dSel); wrap.appendChild(dLabel);
+        wrap.appendChild(okBtn);
+        cell.appendChild(wrap);
+    }
+
+    // Initial: keep existing text, make it clickable
+    cell.title = '클릭하여 날짜를 선택하세요';
+    cell.addEventListener('click', function () {
+        if (cell.dataset.editing === 'true') return;
+        const pre = parseDateFromText(cell.textContent || '');
+        enterEdit(pre);
+    });
+});
+</script>
 </head>
 
 <body link=blue vlink=purple class=xl65>
@@ -849,7 +971,7 @@ BgAAAAAGAAYAhAEAAL4WAAAAAA==
  </tr>
  <tr height=24 style='mso-height-source:userset;height:18.0pt'>
   <td height=24 class=xl65 style='height:18.0pt'></td>
-  <td class=xl77>위와같이 (</td>
+  <td class=xl79>위와같이 (</td>
   <td colspan=3 class="xl79 reason-display">연차</td>
   <td class=xl65 colspan=5 style='mso-ignore:colspan;border-right:.5pt dashed black'>)계를
   제출하오니 허락하여</td>
@@ -868,8 +990,7 @@ BgAAAAAGAAYAhAEAAL4WAAAAAA==
  </tr>
  <tr height=24 style='mso-height-source:userset;height:18.0pt'>
   <td height=24 class=xl65 style='height:18.0pt'></td>
-  <td class=xl69 colspan=3 style='mso-ignore:colspan'><span
-  style='mso-spacerun:yes'>&nbsp; </span>주시기 바랍니다.</td>
+  <td class=xl79 colspan=2 style='mso-ignore:colspan'>주시기 바랍니다.</td>
   <td class=xl65></td>
   <td class=xl65></td>
   <td class=xl65></td>
@@ -895,7 +1016,7 @@ BgAAAAAGAAYAhAEAAL4WAAAAAA==
   <td class=xl65></td>
   <td class=xl65></td>
   <td class=xl65></td>
-  <td colspan=4 class=xl80><span style='mso-spacerun:yes'>&nbsp;&nbsp;
+  <td colspan=4 id="submitDate" class=xl80><span style='mso-spacerun:yes'>&nbsp;&nbsp;
   </span>2025년<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>10월 17일</td>
   <td class=xl74>　</td>
  </tr>
