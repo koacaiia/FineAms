@@ -842,13 +842,37 @@ window.addEventListener('afterprint', function(){
         try {
             const table = document.querySelector('#sheet-wrapper table') || document.querySelector('body > table');
             if (!table) return;
+            
+            // Replace checkboxes with black boxes for PDF
+            const checkboxes = table.querySelectorAll('input[type="checkbox"]');
+            const replacements = [];
+            checkboxes.forEach(cb => {
+                const box = document.createElement('span');
+                box.style.display = 'inline-block';
+                box.style.width = '14px';
+                box.style.height = '14px';
+                box.style.border = '1px solid #000';
+                box.style.backgroundColor = cb.checked ? '#000' : '#fff';
+                box.style.verticalAlign = 'middle';
+                box.style.marginRight = '4px';
+                cb.parentNode.insertBefore(box, cb);
+                cb.style.display = 'none';
+                replacements.push({checkbox: cb, box: box});
+            });
+            
             // Ensure no scaling during capture
             const scaler = document.getElementById('sheet-scale');
             const prevTransform = scaler ? scaler.style.transform : '';
             if (scaler) scaler.style.transform = 'scale(1)';
-            await new Promise(r=>setTimeout(r,0));
+            await new Promise(r=>setTimeout(r,100));
 
             const canvas = await html2canvas(table, { scale: 2, backgroundColor: '#ffffff' });
+            
+            // Restore checkboxes
+            replacements.forEach(r => {
+                r.box.remove();
+                r.checkbox.style.display = '';
+            });
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
             const { jsPDF } = window.jspdf || {};
             if (!jsPDF) { if (scaler) scaler.style.transform = prevTransform; return; }
