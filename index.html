@@ -598,7 +598,7 @@ html, body { margin: 0; padding: 0; height: auto; min-height: 100vh; }
     }
     #sheet-wrapper { 
         width: 15cm !important; 
-        max-height: 21cm !important; 
+        max-height: 20.5cm !important; 
         overflow: hidden !important; 
         margin: 0 auto !important;
         page-break-after: avoid !important;
@@ -837,19 +837,19 @@ window.addEventListener('beforeprint', function(){
     if (!table || !scaler) return;
     const pxPerCm = 96 / 2.54;
     const availW = 15 * pxPerCm;
-    const availH = 20.8 * pxPerCm; // 20.8cm to leave small margin for browser chrome
+    const availH = 20.5 * pxPerCm; // 20.5cm safe height
     const tw = table.offsetWidth || table.getBoundingClientRect().width;
     const th = table.offsetHeight || table.getBoundingClientRect().height;
     if (!tw || !th) return;
-    // Scale to fit page with safety margin
-    const scale = Math.min(availW / tw, availH / th) * 0.98;
+    // Aggressive scaling to prevent bottom clipping
+    const scale = Math.min(availW / tw, availH / th) * 0.95;
     scaler.dataset.prevTransform = scaler.style.transform || '';
     scaler.style.transform = 'scale(' + scale + ')';
     scaler.style.transformOrigin = 'top left';
     // Also set wrapper max dimensions
     const wrapper = document.getElementById('sheet-wrapper');
     if (wrapper) {
-        wrapper.style.maxHeight = '20.8cm';
+        wrapper.style.maxHeight = '20.5cm';
         wrapper.style.overflow = 'hidden';
     }
 });
