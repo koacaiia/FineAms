@@ -872,10 +872,25 @@ window.addEventListener('afterprint', function(){
     function isMobile(){
         return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     }
+    
+    function downloadPDF(pdfBlob) {
+        const url = URL.createObjectURL(pdfBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'fineams.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+    }
+    
     async function generatePDF(){
         try {
             const table = document.querySelector('#sheet-wrapper table') || document.querySelector('body > table');
-            if (!table) return;
+            if (!table) {
+                console.error('Table not found');
+                return null;
+            }
             
             // Replace checkboxes with black boxes for PDF
             const checkboxes = table.querySelectorAll('input[type="checkbox"]');
@@ -898,9 +913,22 @@ window.addEventListener('afterprint', function(){
             const scaler = document.getElementById('sheet-scale');
             const prevTransform = scaler ? scaler.style.transform : '';
             if (scaler) scaler.style.transform = 'scale(1)';
-            await new Promise(r=>setTimeout(r,100));
+            await new Promise(r=>setTimeout(r,200)); // Increased wait time for slower browsers
 
-            const canvas = await html2canvas(table, { scale: 2, backgroundColor: '#ffffff' });
+            // Check if html2canvas is loaded
+            if (typeof html2canvas === 'undefined') {
+                console.error('html2canvas not loaded');
+                alert('PDF 생성 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+                return null;
+            }
+
+            const canvas = await html2canvas(table, { 
+                scale: 2, 
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                allowTaint: true,
+                logging: false
+            });
             
             // Restore checkboxes
             replacements.forEach(r => {
@@ -948,48 +976,48 @@ window.addEventListener('afterprint', function(){
                 const pdfBlob = await generatePDF();
                 console.log('PDF generated:', pdfBlob);
                 
-                if (pdfBlob && navigator.share && navigator.canShare) {
-                    const file = new File([pdfBlob], 'fineams.pdf', { type: 'application/pdf' });
-                    const canShare = navigator.canShare({ files: [file] });
-                    console.log('Can share files:', canShare);
-                    
-                    if (canShare) {
-                        try {
-                            await navigator.share({
-                                title: '근태계',
-                                text: '근태 신청서',
-                                files: [file]
-                            });
-                            console.log('Share successful');
-                        } catch(err) {
-                            console.log('Share cancelled or failed:', err);
-                            // Download as fallback
-                            const url = URL.createObjectURL(pdfBlob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = 'fineams.pdf';
-                            a.click();
-                            URL.revokeObjectURL(url);
+                if (pdfBlob && navigator.share) {
+                    try {
+                        const file = new File([pdfBlob], 'fineams.pdf', { type: 'application/pdf' });
+                        
+                        // Check if canShare exists and if it supports files
+                        let canShare = false;
+                        if (navigator.canShare) {
+                            try {
+                                canShare = navigator.canShare({ files: [file] });
+                            } catch(e) {
+                                console.log('canShare check failed:', e);
+                                canShare = false;
+                            }
                         }
-                    } else {
-                        // Direct download if can't share files
-                        console.log('Cannot share files, downloading...');
-                        const url = URL.createObjectURL(pdfBlob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'fineams.pdf';
-                        a.click();
-                        URL.revokeObjectURL(url);
+                        console.log('Can share files:', canShare);
+                        
+                        if (canShare) {
+                            try {
+                                await navigator.share({
+                                    title: '근태계',
+                                    text: '근태 신청서',
+                                    files: [file]
+                                });
+                                console.log('Share successful');
+                            } catch(err) {
+                                console.log('Share cancelled or failed:', err);
+                                // Download as fallback
+                                downloadPDF(pdfBlob);
+                            }
+                        } else {
+                            // Try sharing without files (text only) or download
+                            console.log('Cannot share files, trying text share or download...');
+                            downloadPDF(pdfBlob);
+                        }
+                    } catch(e) {
+                        console.error('Share process error:', e);
+                        downloadPDF(pdfBlob);
                     }
                 } else if (pdfBlob) {
                     // Fallback: download if share API not available
                     console.log('Share API not available, downloading...');
-                    const url = URL.createObjectURL(pdfBlob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'fineams.pdf';
-                    a.click();
-                    URL.revokeObjectURL(url);
+                    downloadPDF(pdfBlob);
                 }
             } else {
                 // Desktop: Use browser print dialog (scaled to 1 page via beforeprint)
