@@ -585,20 +585,20 @@ html, body { margin: 0; padding: 0; height: auto; min-height: 100vh; }
 #printImg:hover { background: #e9e9e9; }
 /* Print layout adjustments */
 @page { 
-    size: 15cm 21cm; 
-    margin: 1cm 0 0 0; 
+    size: A4 portrait; 
+    margin: 1cm 1cm 1cm 1cm; 
 }
 @media print {
     html, body { 
-        width: 15cm !important; 
-        height: 21cm !important; 
+        width: 21cm !important; 
+        height: 29.7cm !important; 
         overflow: hidden !important;
         margin: 0 !important;
         padding: 0 !important;
     }
     #sheet-wrapper { 
-        width: 15cm !important; 
-        max-height: 19.5cm !important; 
+        width: 19cm !important; 
+        max-height: 27.7cm !important; 
         overflow: hidden !important; 
         margin: 0 auto !important;
         page-break-after: avoid !important;
@@ -836,8 +836,8 @@ window.addEventListener('beforeprint', function(){
     const scaler = document.getElementById('sheet-scale');
     if (!table || !scaler) return;
     const pxPerCm = 96 / 2.54;
-    const availW = 15 * pxPerCm;
-    const availH = 19.5 * pxPerCm; // 21cm - 1cm top margin - 0.5cm safety = 19.5cm
+    const availW = 19 * pxPerCm; // A4 width 21cm - 2cm margins
+    const availH = 27.7 * pxPerCm; // A4 height 29.7cm - 2cm margins
     const tw = table.offsetWidth || table.getBoundingClientRect().width;
     const th = table.offsetHeight || table.getBoundingClientRect().height;
     if (!tw || !th) return;
@@ -849,7 +849,7 @@ window.addEventListener('beforeprint', function(){
     // Also set wrapper max dimensions
     const wrapper = document.getElementById('sheet-wrapper');
     if (wrapper) {
-        wrapper.style.maxHeight = '19.5cm';
+        wrapper.style.maxHeight = '27.7cm';
         wrapper.style.overflow = 'hidden';
     }
 });
@@ -910,14 +910,15 @@ window.addEventListener('afterprint', function(){
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
             const { jsPDF } = window.jspdf || {};
             if (!jsPDF) { if (scaler) scaler.style.transform = prevTransform; return; }
-            const doc = new jsPDF({ unit: 'cm', format: [15,21], orientation: 'portrait' });
-            const pageW = 15, pageH = 21, topMargin = 1;
-            const availH = pageH - topMargin - 0.5; // 1cm top margin + 0.5cm safety
+            const doc = new jsPDF({ unit: 'cm', format: 'a4', orientation: 'portrait' });
+            const pageW = 21, pageH = 29.7, topMargin = 1, sideMargin = 1;
+            const availW = pageW - sideMargin * 2;
+            const availH = pageH - topMargin - 1; // 1cm top + 1cm bottom margin
             const imgWcm = canvas.width * 2.54 / 96; // px to cm @96dpi
             const imgHcm = canvas.height * 2.54 / 96;
-            const ratio = Math.min(pageW / imgWcm, availH / imgHcm) * 0.995;
+            const ratio = Math.min(availW / imgWcm, availH / imgHcm) * 0.995;
             const w = imgWcm * ratio, h = imgHcm * ratio;
-            const x = (pageW - w)/2, y = topMargin; // no top margin, center horizontally
+            const x = (pageW - w)/2, y = topMargin;
             doc.addImage(imgData, 'JPEG', x, y, w, h);
             
             if (scaler) scaler.style.transform = prevTransform;
