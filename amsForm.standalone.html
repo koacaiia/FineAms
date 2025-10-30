@@ -811,13 +811,15 @@ window.addEventListener('beforeprint', function(){
     if (!table || !scaler) return;
     const pxPerCm = 96 / 2.54;
     const availW = 15 * pxPerCm;
-    const availH = (21 - 2) * pxPerCm - 2; // subtract tiny epsilon to avoid overflow
+    const availH = (21 - 2) * pxPerCm; // 21cm - 2cm top margin = 19cm available
     const tw = table.offsetWidth || table.getBoundingClientRect().width;
     const th = table.offsetHeight || table.getBoundingClientRect().height;
     if (!tw || !th) return;
-    const scale = Math.min(availW / tw, availH / th, 1) * 0.995; // slight shrink to ensure 1 page
+    // More aggressive scaling to ensure single page
+    const scale = Math.min(availW / tw, availH / th) * 0.98; // 98% to ensure margin
     scaler.dataset.prevTransform = scaler.style.transform || '';
     scaler.style.transform = 'scale(' + scale + ')';
+    scaler.style.transformOrigin = 'top left';
 });
 window.addEventListener('afterprint', function(){
     const scaler = document.getElementById('sheet-scale');
@@ -902,11 +904,9 @@ window.addEventListener('afterprint', function(){
         btn.addEventListener('click', async function(e){
             e.preventDefault();
             
-            // Generate PDF for both desktop and mobile to ensure single page
-            const pdfBlob = await generatePDF();
-            
             if (isMobile()) {
-                // Mobile: Try to share, fallback to download
+                // Mobile: Generate PDF and share
+                const pdfBlob = await generatePDF();
                 if (pdfBlob && navigator.share) {
                     try {
                         const file = new File([pdfBlob], 'fineams.pdf', { type: 'application/pdf' });
@@ -934,15 +934,8 @@ window.addEventListener('afterprint', function(){
                     URL.revokeObjectURL(url);
                 }
             } else {
-                // Desktop: Download PDF directly (guaranteed single page)
-                if (pdfBlob) {
-                    const url = URL.createObjectURL(pdfBlob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'fineams.pdf';
-                    a.click();
-                    URL.revokeObjectURL(url);
-                }
+                // Desktop: Use browser print dialog (scaled to 1 page via beforeprint)
+                window.print();
             }
         });
     });
