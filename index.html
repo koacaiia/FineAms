@@ -546,6 +546,11 @@ input[type="checkbox"]:disabled {
 	background-color: #da190b;
 }
 
+/* Hide modal in print */
+@media print {
+    .modal-overlay { display: none !important; }
+}
+
 /* SubmitDate inline editor */
 #submitDate { cursor: pointer; }
 #submitDate .sd-wrapper { display: inline-flex; align-items: center; gap: 6px; }
@@ -1794,9 +1799,12 @@ function openDateTimeModal() {
     const modalInputs = document.getElementById('modalInputs');
     const dateSelect = document.getElementById('dateSelect');
     
-    // 현재 값 파싱
-    let currentValues = {};
-    const currentText = dateSelect.textContent.trim();
+    // 현재 값 파싱: YYYY.MM.DD 형태 먼저 추출
+    const currentText = (dateSelect.textContent || '').trim();
+    const dateMatch = currentText.match(/(\d{4})\.(\d{2})\.(\d{2})/);
+    const today = new Date();
+    const defaultDateISO = dateMatch ? `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`
+                                     : `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
     
     // 모달 입력 필드 생성
     modalInputs.innerHTML = '';
@@ -1806,18 +1814,38 @@ function openDateTimeModal() {
             modalInputs.innerHTML = `
                 <div class="modal-input-group">
                     <label>날짜:</label>
-                    <input type="date" id="modal-date1" value="2025-10-24">
+                    <input type="date" id="modal-date1" value="${defaultDateISO}">
                 </div>
             `;
             break;
             
         case '반차':
+            // 반차: 오전/오후 고정 시간 선택 라디오
+            modalInputs.innerHTML = `
+                <div class="modal-input-group">
+                    <label>날짜:</label>
+                    <input type="date" id="modal-date1" value="${defaultDateISO}">
+                </div>
+                <div class="modal-input-group" role="radiogroup" aria-label="반차 구분">
+                    <label>구분:</label>
+                    <label style="display:inline-flex;align-items:center;gap:4px;">
+                        <input type="radio" name="modal-half" id="modal-half-am" value="am" checked>
+                        오전 (09:00~14:00)
+                    </label>
+                    <label style="display:inline-flex;align-items:center;gap:4px;">
+                        <input type="radio" name="modal-half" id="modal-half-pm" value="pm">
+                        오후 (14:00~18:00)
+                    </label>
+                </div>
+            `;
+            break;
+
         case '조퇴':
         case '외출':
             modalInputs.innerHTML = `
                 <div class="modal-input-group">
                     <label>날짜:</label>
-                    <input type="date" id="modal-date1" value="2025-10-24">
+                    <input type="date" id="modal-date1" value="${defaultDateISO}">
                 </div>
                 <div class="modal-input-group">
                     <label>시작시간:</label>
@@ -1834,11 +1862,11 @@ function openDateTimeModal() {
             modalInputs.innerHTML = `
                 <div class="modal-input-group">
                     <label>시작일:</label>
-                    <input type="date" id="modal-date1" value="2025-10-24">
+                    <input type="date" id="modal-date1" value="${defaultDateISO}">
                 </div>
                 <div class="modal-input-group">
                     <label>종료일:</label>
-                    <input type="date" id="modal-date2" value="2025-10-25">
+                    <input type="date" id="modal-date2" value="${defaultDateISO}">
                 </div>
             `;
             break;
@@ -1847,7 +1875,7 @@ function openDateTimeModal() {
             modalInputs.innerHTML = `
                 <div class="modal-input-group">
                     <label>시작일:</label>
-                    <input type="date" id="modal-date1" value="2025-10-24">
+                    <input type="date" id="modal-date1" value="${defaultDateISO}">
                 </div>
                 <div class="modal-input-group">
                     <label>시작시간:</label>
@@ -1855,7 +1883,7 @@ function openDateTimeModal() {
                 </div>
                 <div class="modal-input-group">
                     <label>종료일:</label>
-                    <input type="date" id="modal-date2" value="2025-10-24">
+                    <input type="date" id="modal-date2" value="${defaultDateISO}">
                 </div>
                 <div class="modal-input-group">
                     <label>종료시간:</label>
@@ -1883,6 +1911,8 @@ function confirmDateTimeModal() {
     const date2 = document.getElementById('modal-date2');
     const time1 = document.getElementById('modal-time1');
     const time2 = document.getElementById('modal-time2');
+    const halfAm = document.getElementById('modal-half-am');
+    const halfPm = document.getElementById('modal-half-pm');
     
     switch(currentReason) {
         case '연차':
@@ -1892,6 +1922,19 @@ function confirmDateTimeModal() {
             break;
             
         case '반차':
+            if (date1 && (halfAm || halfPm)) {
+                const base = date1.value.replace(/-/g, '.');
+                const isAm = halfAm && halfAm.checked;
+                const range = isAm ? '09:00 ~ 14:00' : '14:00 ~ 18:00';
+                textContent = `${base} ${range}`;
+                // 비고 대신 사유 칸에 오전반차/오후반차 기재
+                const reasonCell = document.getElementById('reasonSelect');
+                if (reasonCell) {
+                    reasonCell.textContent = isAm ? '오전반차' : '오후반차';
+                }
+            }
+            break;
+
         case '조퇴':
         case '외출':
             if (date1 && time1 && time2) {
@@ -1938,7 +1981,7 @@ document.addEventListener('DOMContentLoaded', function() {
         dateSelect.textContent = todayStr;
     }
     
-    // #dateSelect 클릭 시 모달 열기
+    // #dateSelect 클릭 시 모달 열기 (기존 동작 유지)
     if (dateSelect) {
         dateSelect.addEventListener('click', openDateTimeModal);
         // 폰트 자동 조정 비활성화: staffList select와 동일한 크기로 유지
@@ -1972,6 +2015,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     reasonDisplays.forEach(display => {
                         display.textContent = reason;
                     });
+
+                    // 반차 선택 시마다 모달 표시
+                    if (reason === '반차') {
+                        openDateTimeModal();
+                    }
                 }
             }
         });
